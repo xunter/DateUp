@@ -1,8 +1,17 @@
 ﻿/*
 DateUp - JavaScript method-utility for converting date in json format to Date object
+<<<<<<< HEAD
+Version: 0.1
+Author: Nazarov P.A. (xunter@list.ru)
+Date: 2011-11-01
+Example:
+	var obj = {date: "2011-10-10T10:10:10.20"};
+	var objWithDate = dup(obj); //objWithDate.date ~== 	new Date(2011, 10, 10, 10, 10, 10, 20)
+=======
 
 var obj = {date: "2011-10-10T10:10:10.20"};
 var objWithDate = dup(obj);
+>>>>>>> ebdb956b735043bd44d70d031a57136ae0f559cf
 */
 !function(window, $) {
 	var
