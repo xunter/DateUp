@@ -1,39 +1,37 @@
 ﻿/*
-DateUp - JavaScript method-utility for converting date in json format to Date object
-<<<<<<< HEAD
-Version: 0.1
+DateUp v0.2 - JavaScript method-utility for converting date in json format to Date object
 Author: Nazarov P.A. (xunter@list.ru)
 Date: 2011-11-01
 Example:
 	var obj = {date: "2011-10-10T10:10:10.20"};
 	var objWithDate = dup(obj); //objWithDate.date ~== 	new Date(2011, 10, 10, 10, 10, 10, 20)
-=======
-
-var obj = {date: "2011-10-10T10:10:10.20"};
-var objWithDate = dup(obj);
->>>>>>> ebdb956b735043bd44d70d031a57136ae0f559cf
 */
-!function(window, $) {
+!function(window) {
 	var
 		RE = /^\/Date\(([0-9-+]+)\)\/$/,
 		ISO8601_RE = /^(\d{2,4})-(\d{1,2})-(\d{1,2})T(\d{1,2}):(\d{1,2}):(\d{1,2})\.(\d{1,3})(Z|([+|-](\d+)|(\d{1,2}:\d{1,2})))$/,
 		
-		jQueryDataFilter = true,
+		useJQueryDataFilter = typeof(window.dup) !== "undefined" && typeof(window.dup.jQueryDataFilter) === "boolean" ? dup.jQueryDataFilter : typeof(jQuery) !== "undefined",
 		
 		parseDateForRE = function(text) {
 			return new Date(parseInt(text.match(RE)[1]));
 		},
 		
 		parseDateForISO8601RE = function(text) {			
+			var matches = text.match(ISO8601_RE);
+			if (matches === null) return text;
+			
+			for (var i=0; i<matches.length; i++)
+				matches[i] = parseInt(matches[i]);
+			
 			var
-				matches = text.match(ISO8601_RE),
-				year = parseInt(matches[1]),
-				month = parseInt(matches[2]),
-				day = parseInt(matches[3]),
-				hours = parseInt(matches[4]),
-				minutes = parseInt(matches[5]),
-				seconds = parseInt(matches[6]),
-				ms = parseInt(matches[7]);
+				year = matches[1],
+				month = matches[2],
+				day = matches[3],
+				hours = matches[4],
+				minutes = matches[5],
+				seconds = matches[6],
+				ms = matches[7];
 										
 			return new Date(year, month-1, day, hours, minutes, seconds, ms);
 		},
@@ -72,22 +70,32 @@ var objWithDate = dup(obj);
 					return parseDateForISO8601RE(obj);
 			
 			return obj;
-		};
+		},
 		
-		dup.jQueryDataFilter = function(value) {
-			jQueryDataFilter = value;
-			
-			return dup;
-		};
-		
-		if ($ && jQueryDataFilter)
-			$.ajaxSetup({
+		setJQueryDataFilter = function() {
+			jQuery.ajaxSetup({
 				"dataFilter": function (data, type) {
 					if (type === "json") {
-						data = $.parseJSON(data);
+						data = jQuery.parseJSON(data);
 						return dup(data);
 					}
 					return data;
 				}
 			});
-}(window, jQuery)
+		},
+		
+		jQueryDataFilter = dup.jQueryDataFilter = function(value) {
+			if (arguments.length) {
+				useJQueryDataFilter = value;
+				if (value && typeof(jQuery) !== "undefined")
+					setJQueryDataFilter();
+				
+				return dup;
+			} else
+				return useJQueryDataFilter;
+		};
+		
+		if (useJQueryDataFilter)
+			jQueryDataFilter(true);
+		
+}(window)
